@@ -48,7 +48,7 @@ void exitMain(bool &exit_main)
              break;
         }
 }
-int main_bck()
+int main()
 {
     int rec[8] = { 0 };
     int rv;
@@ -138,6 +138,7 @@ int main_bck()
 #ifdef CAPPOINTCLOUD
 	int fileindex = 0;
 #endif
+    int fileindex = 0;
 	while (!exit_main)
 	{
 		FrameData_t* frame_data_p;
@@ -166,17 +167,26 @@ int main_bck()
 		*/
 
 		short * depths = new short[DEPTHMAP_W * DEPTHMAP_H ];
+        neolix::point3Df *cloud = new neolix::point3Df[DEPTHMAP_W * DEPTHMAP_H ];
 		for (int i = 0; i < DEPTHMAP_H * DEPTHMAP_W ; i++)
 
 		{
 		depths[i] = static_cast<short> (frame_data_p[i].z * 1000.0f);
-
+        cloud[i].x = frame_data_p[i].x * 1000.0f;
+        cloud[i].y = frame_data_p[i].y * 1000.0f;
+        cloud[i].z = frame_data_p[i].z * 1000.0f;
+      //  std::cout<<cloud[i].x<<"  , "<<cloud[i].y<<"  , "<<cloud[i].z<<std::endl;
 		}
 
 		neolix::depthData pd;
 		pd.data = depths;
 		pd.width = DEPTHMAP_W;
 		pd.height = DEPTHMAP_H;
+
+        neolix::pointcloudData pointscloud;
+        pointscloud.width = DEPTHMAP_W;
+        pointscloud.height = DEPTHMAP_H;
+        pointscloud.data = cloud;
 		void* buff = malloc(DEPTHMAP_H * DEPTHMAP_W * 3 * sizeof(uchar));
 
 		neolix::getDepthColor(pd, buff);
@@ -210,58 +220,94 @@ int main_bck()
 #ifdef MEASURE
 		if(ismeasure)
 		  {
+            std::string point("point");
+            std::stringstream ss;
+            ss<<fileindex;
+            point +=ss.str();
+            point += ".txt";
+
+            std::string depth("depth");
+            depth +=ss.str();
+            depth += ".txt";
+            fileindex++;
+
+            std::ofstream ofile;
+            std::ofstream ofile2;
+            ofile.open(point);
+            ofile2.open(depth);
+
+
+
+            for (int i = 0; i < DEPTHMAP_H * DEPTHMAP_W ; i++)
+
+            {
+          //  depths[i] = static_cast<short> (frame_data_p[i].z * 1000.0f);
+             ofile2<<frame_data_p[i].z*1000.0f<<std::endl;
+          ///   if(frame_data_p[i].z > 0) filter invial data
+             ofile<<frame_data_p[i].x*1000.0f<<"  "<<frame_data_p[i].y*1000.0f<<"  "<<frame_data_p[i].z*1000.0f<<std::endl;
+ //            ofile<<cloud[i].x<<"  "<<cloud[i].y<<"  "<<cloud[i].z<<std::endl;
+
+            }
+            ofile.close();
+            ofile2.close();
+            std::cout<<"Save pointCloud in "<<point<<std::endl;
+            std::cout<<"Save depth in "<<depth<<std::endl;
 		     ismeasure = false;
 		      neolix::vol v;
-		     if (neolix::measureVol2(pd, v, 1))
+           //  if (neolix::measureVol2(pd, v, 1));
+             if(neolix::measureVol3(pointscloud,v,1))
 
 		      std::cout << "length: " << v.length << "width: " << v.width << "height: " << v.height << std::endl;
+             else std::cout<<"can not measure VOL"<<std::endl;
 		  }
 #endif
 
 #ifdef CAPPOINTCLOUD
-      if(issave)
-          {
-          std::string point("point");
-          std::stringstream ss;
-          ss<<fileindex;
-          point +=ss.str();
-          point += ".txt";
+//      if(issave)
+//          {
+//          std::string point("point");
+//          std::stringstream ss;
+//          ss<<fileindex;
+//          point +=ss.str();
+//          point += ".txt";
 
-          std::string depth("depth");
-          depth +=ss.str();
-          depth += ".txt";
-          fileindex++;
+//          std::string depth("depth");
+//          depth +=ss.str();
+//          depth += ".txt";
+//          fileindex++;
 
-          std::ofstream ofile;
-          std::ofstream ofile2;
-          ofile.open(point);
-          ofile2.open(depth);
-          ofile2<<DEPTHMAP_H<<std::endl;
-          ofile2<<DEPTHMAP_W<<std::endl;
+//          std::ofstream ofile;
+//          std::ofstream ofile2;
+//          ofile.open(point);
+//          ofile2.open(depth);
+//          ofile2<<DEPTHMAP_H<<std::endl;
+//          ofile2<<DEPTHMAP_W<<std::endl;
 
-          ofile<<DEPTHMAP_H<<std::endl;
-          ofile<<DEPTHMAP_W<<std::endl;
+//          ofile<<DEPTHMAP_H<<std::endl;
+//          ofile<<DEPTHMAP_W<<std::endl;
 
-          ofile<<rec[0]<<" "<<rec[1]<<" "<<rec[2]<<" "<<rec[3]<<std::endl;
-          ofile<<rec[4]<<" "<<rec[5]<<" "<<rec[6]<<" "<<rec[7]<<std::endl;
+//          ofile<<rec[0]<<" "<<rec[1]<<" "<<rec[2]<<" "<<rec[3]<<std::endl;
+//          ofile<<rec[4]<<" "<<rec[5]<<" "<<rec[6]<<" "<<rec[7]<<std::endl;
 
 
-          for (int i = 0; i < DEPTHMAP_H * DEPTHMAP_W ; i++)
+//          for (int i = 0; i < DEPTHMAP_H * DEPTHMAP_W ; i++)
 
-          {
-        //  depths[i] = static_cast<short> (frame_data_p[i].z * 1000.0f);
-           ofile2<<frame_data_p[i].z*1000.0f<<std::endl;
-        ///   if(frame_data_p[i].z > 0) filter invial data
-           ofile<<frame_data_p[i].x*1000.0f<<"  "<<frame_data_p[i].y*1000.0f<<"  "<<frame_data_p[i].z*1000.0f<<std::endl;
+//          {
+//        //  depths[i] = static_cast<short> (frame_data_p[i].z * 1000.0f);
+//           ofile2<<frame_data_p[i].z*1000.0f<<std::endl;
+//        ///   if(frame_data_p[i].z > 0) filter invial data
+//           ofile<<frame_data_p[i].x*1000.0f<<"  "<<frame_data_p[i].y*1000.0f<<"  "<<frame_data_p[i].z*1000.0f<<std::endl;
 
-          }
-          ofile.close();
-          ofile2.close();
-          std::cout<<"Save pointCloud in "<<point<<std::endl;
-          std::cout<<"Save depth in "<<depth<<std::endl;
-          issave = false;
-        }
+//          }
+//          ofile.close();
+//          ofile2.close();
+//          std::cout<<"Save pointCloud in "<<point<<std::endl;
+//          std::cout<<"Save depth in "<<depth<<std::endl;
+//          issave = false;
+//        }
 #endif
+      delete[] depths;
+      delete[] cloud;
 
 	}
 
@@ -270,7 +316,7 @@ int main_bck()
 
 }
 
-int main()
+int main0()
 {
 
   std::cout<<"=========== TEST  test_rotatePlane() begin========================"<<std::endl;
@@ -285,6 +331,7 @@ int main()
 
   neolix::test_measure3D();
   std::cout<<"=========== TEST  test_measure3D()    end  ========================"<<std::endl<<std::endl;
+ // neolix::testCloud();
 
   return 0;
 

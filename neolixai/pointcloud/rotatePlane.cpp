@@ -3,9 +3,9 @@
 #include"../imagepro/Utils.h"
 #include"../pointcloud/ransac.h"
 #include<opencv2/contrib/contrib.hpp>
-#include"../../include/libTof.h"
 #include<cmath>
-
+#include<fstream>
+//#define SAVEPOINT
 namespace neolix {
 
   rotatePlane::rotatePlane():planePoints(nullptr),size(0),in_size_(0),method(1),planeParameter(nullptr),normalVector(nullptr),inMinRectData(nullptr),RotationMatrix(nullptr)
@@ -14,6 +14,15 @@ namespace neolix {
 
   bool rotatePlane::setData(pointcloudData pcd, cv::Rect maxRect, cv::Rect minRect)
   {
+
+#ifdef SAVEPOINT
+      std::ofstream innerPointFile;
+      std::ofstream outerPointFile;
+
+      innerPointFile.open("innerPoint.txt");
+      outerPointFile.open("outerPoint.txt");
+
+#endif
     if(maxRect.area() <= minRect.area()) return false;
 
     size_t cloudPointWidth = pcd.width;
@@ -35,42 +44,57 @@ namespace neolix {
 //    inMinRectData = nullptr;
 
 
-    for(int row = maxRect.y; row < maxRect.width; row++)
+    for(int row = maxRect.y; row < maxRect.height; row++)
       {
-        for(int col = maxRect.x; col < maxRect.height; col++ )
+        for(int col = maxRect.x; col < maxRect.width; col++ )
           {
             point.x = col;
             point.y = row;
 
 
+          if( maxRect.contains(point) && !minRect.contains(point) )
+           //if( !((col <minRect.x+minRect.width  && minRect.x<col) && !( row > minRect.y && row < minRect.y + minRect.height)))///inn
 
-           if( !((col <minRect.x+minRect.width  && minRect.x<col) && ( row > minRect.y && row < minRect.y + minRect.height)))
-       //     if(true)
+           // if(true)
               {
               // std::cout<<"col:"<<col<<"row:"<<row<<std::endl;
              //  std::cout<<"minRect.x:"<<minRect.x<<"  minRect.x+minRect.width:"<<minRect.x+minRect.width<<std::endl;
-                if( ((point3Df*)pointdata)[row*cloudPointWidth + col].z > 0)
+                if( ((point3Df*)pointdata)[row*cloudPointWidth + col].z > 30)
                 {
-                   this->planePoints->data[count_points][0] = static_cast<double>(((point3Df*)pointdata)[row*cloudPointWidth + col].x * 1000.0f); ///The raw data is in meters, converted to millimeters
-                   this->planePoints->data[count_points][1] = static_cast<double>(((point3Df*)pointdata)[row*cloudPointWidth + col].y * 1000.0f);
-                   this->planePoints->data[count_points][2] = static_cast<double>(((point3Df*)pointdata)[row*cloudPointWidth + col].z * 1000.0f);
+                   this->planePoints->data[count_points][0] = static_cast<double>(((point3Df*)pointdata)[row*cloudPointWidth + col].x ); ///The raw data is in meters, converted to millimeters
+                   this->planePoints->data[count_points][1] = static_cast<double>(((point3Df*)pointdata)[row*cloudPointWidth + col].y );
+                   this->planePoints->data[count_points][2] = static_cast<double>(((point3Df*)pointdata)[row*cloudPointWidth + col].z );
+                   // this->planePoints->data[count_points][2] = 11.2;
+                  //  std::cout<<pcld->data[0][2]<<std::endl;
+                 //  std::cout<<this->planePoints->data[count_points][2]<<std::endl;
+#ifdef SAVEPOINT
+                    outerPointFile<<this->planePoints->data[count_points][0]<<" "<<this->planePoints->data[count_points][1]<<" "<<this->planePoints->data[count_points][2]<<std::endl;
+#endif
                    count_points++;
                 }
               }else
               {
-                if(((point3Df*)pointdata)[row*cloudPointWidth + col].z > 0)
+                if(((point3Df*)pointdata)[row*cloudPointWidth + col].z > 30)
                 {
                  //  float tt    = static_cast<double>(((point3Df*)pointdata)[row*cloudPointWidth + col].x * 1000.0f);
-                  inMinRectData[3*in_count_points]     = static_cast<float>(((point3Df*)pointdata)[row*cloudPointWidth + col].x * 1000.0f);
-                  inMinRectData[3*in_count_points + 1] = static_cast<double>(((point3Df*)pointdata)[row*cloudPointWidth + col].y * 1000.0f);
-                  inMinRectData[3*in_count_points + 2] = static_cast<double>(((point3Df*)pointdata)[row*cloudPointWidth + col].z * 1000.0f);
+                  inMinRectData[3*in_count_points]     = static_cast<float>(((point3Df*)pointdata)[row*cloudPointWidth + col].x );
+                  inMinRectData[3*in_count_points + 1] = static_cast<double>(((point3Df*)pointdata)[row*cloudPointWidth + col].y );
+                  inMinRectData[3*in_count_points + 2] = static_cast<double>(((point3Df*)pointdata)[row*cloudPointWidth + col].z );
                 //  std::cout<<inMinRectData[3*in_count_points]<<" , "<<inMinRectData[3*in_count_points+1]<<" , "<<inMinRectData[3*in_count_points + 2]<<std::endl;
+#ifdef SAVEPOINT
+                  innerPointFile<<inMinRectData[3*in_count_points]<<" "<<inMinRectData[3*in_count_points + 1]<<" "<<inMinRectData[3*in_count_points + 2]<<std::endl;
+#endif
                   in_count_points++;
 
                 }
               }
           }
       }
+
+#ifdef SAVEPOINT
+    innerPointFile.close();
+    outerPointFile.close();
+#endif
     this->planePoints->onlyModifySzie(count_points);
   //  std::cout<<" count_points================  "<<count_points<<std::endl;
     this->size = count_points;

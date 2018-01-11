@@ -3,6 +3,9 @@
 #include<vector>
 #include<iostream>
 #include<opencv2/imgproc/imgproc.hpp>
+#include<fstream>
+#include<string>
+//#define DEBUDSAVEDATA
 
 namespace neolix {
 
@@ -18,6 +21,14 @@ namespace neolix {
   {
     cv::Mat t = cv::Mat(size,3,CV_32FC1,data);
     this->objectPoints = t.clone();
+#ifdef DEBUDSAVEDATA
+    std::ofstream ofile;
+    ofile.open("measure3DOrigindata.txt");
+    ofile<<this->objectPoints<<std::endl;
+    ofile.close();
+
+#endif
+
   }
 
   bool measureVol3D::parseObject(cv::Mat rotateMatrix)
@@ -27,12 +38,20 @@ namespace neolix {
     if(abs(1-cv::determinant(rotateMatrix)) > 0.00001) return false;
 
     if(3 != this->objectPoints.cols) return false;
+    if(this->objectPoints.rows <= 3) return false;
 
    // std::cout<<this->objectPoints<<std::endl;
     //std::cout<<rotateMatrix<<std::endl;
 
 
     this->objectPoints =(rotateMatrix*this->objectPoints.t()).t();
+
+#ifdef DEBUDSAVEDATA
+    std::ofstream ofile;
+    ofile.open("measure3DparaseData.txt");
+    ofile<<this->objectPoints<<std::endl;
+    ofile.close();
+#endif
 
    /// cv::minMaxLoc(this->objectPoints,&minVal);
     return true;
@@ -100,6 +119,11 @@ namespace neolix {
     float* ptr =objectPoints.ptr<float>();
     float temp;
     int numPoinrIN = 0;
+#ifdef DEBUDSAVEDATA
+    std::ofstream ofile;
+    ofile.open("Selectpoint.txt");
+
+#endif
     for(int id = 0; id < sz;id++)
     {
 //      temp = (ptr[id*3+2] - minVal)*steps/(truncationVal - minVal);
@@ -113,6 +137,9 @@ namespace neolix {
               point.x = ptr[id*3];
               point.y = ptr[id*3+1];
               points.push_back(point);
+#ifdef DEBUDSAVEDATA
+              ofile<<ptr[id*3]<<" "<<ptr[id*3 +1 ]<<" "<<ptr[id*3 + 2]<<std::endl;
+#endif
               numPoinrIN++;
 
           }
@@ -129,13 +156,19 @@ namespace neolix {
             point.x = ptr[id*3];
             point.y = ptr[id*3+1];
        //     std::cout<<"x: "<< point.x<<"  y:"<<point.y<<std::endl;
-            points.push_back(point);\
+            points.push_back(point);
+#ifdef DEBUDSAVEDATA
+              ofile<<ptr[id*3]<<" "<<ptr[id*3 +1 ]<<" "<<ptr[id*3 + 2]<<std::endl;
+#endif
             numPoinrIN++;
           }
 
       }
 
     }
+#ifdef DEBUDSAVEDATA
+    ofile.close();
+#endif
 
     if(points.size() < 5)
       {

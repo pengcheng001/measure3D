@@ -235,4 +235,15 @@ namespace neolix {
 
   }
 
+  void testCloud(){
+      pointcloud<double> *pcld;
+      pcld = new pointcloud<double>();
+      pcld->resize(10,10);
+      pcld->data[0][0] = 10.2;
+      pcld->data[0][1] = 10.2;
+      pcld->data[0][2] = 10.2;
+
+      std::cout<<pcld->data[0][2]<<std::endl;
+  }
+
 }

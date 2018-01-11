@@ -30,7 +30,7 @@ NEOLIX_STATUS_LIST measureBox(IN_ const cv::Mat depthImage,
 //        cv::Rect rects  = cv::Rect(g_rect_para.at<long>(0,0), g_rect_para.at<long>(1,0),
 //				 g_rect_para.at<long>(2,0), g_rect_para.at<long>(3,0));
 	    cv::Rect rects  = cv::Rect(g_plane_rect.at<long>(0,0), g_plane_rect.at<long>(1,0),
-				     g_plane_rect.at<long>(2,0), g_plane_rect.at<long>(3,0));
+        g_plane_rect.at<long>(2,0), g_plane_rect.at<long>(3,0));
         depthRoi = depthImage(rects);
     }else depthRoi = depthImage;
 	colorRoi = depthRoi.clone();

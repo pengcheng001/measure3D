@@ -187,7 +187,7 @@ class pointcloud
 
     template<typename Tp, int cnt> inline Tp& Point_<Tp, cnt>:: operator[](int index)
     {
-        if(index > cnt) throw "neolix Point_ 指针越界";
+        if(index >= cnt) throw "neolix Point_ 指针越界";
 
         return this->data[index];
     }

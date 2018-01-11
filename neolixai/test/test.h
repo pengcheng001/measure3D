@@ -7,6 +7,7 @@ namespace neolix {
 
   void test_rotatePlane();
   void test_measure3D();
+  void testCloud();
 
 }
 

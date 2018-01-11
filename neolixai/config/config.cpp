@@ -397,14 +397,24 @@ void UptateComfigToXml(cv::Mat &data, STORM_FLAG flag)
 
 void getDepthColor(depthData depth_,void *buff)
 {
-    void* data = malloc(depth_.width*depth_.height*sizeof(short));
-    memcpy(data, (void*)depth_.data, depth_.width*depth_.height*sizeof(short));
+	if ((NULL == depth_.data) || (NULL == buff))
+			return;
+    void* data = (void*)depth_.data;
     cv::Mat d = cv::Mat(depth_.height,depth_.width,CV_16UC1,data);
     DepthRender render ;
     cv::Mat depthColorMat = render.Compute(d);
     memcpy(buff, (void*)depthColorMat.data, depthColorMat.rows*depthColorMat.cols*3*sizeof(uchar));
-    free(data);
 
+}
+void yuv2rgb(depthData depth_,void *buff)
+{
+	if ((NULL == depth_.data) || (NULL == buff))
+		return;
+	void *pTmp = depth_.data;
+	cv::Mat mtVideoData(depth_.height * 3 / 2, depth_.width, CV_8UC1, pTmp);
+	cv::Mat mtOutData(depth_.height, depth_.width, CV_8UC3);
+	cv::cvtColor(mtVideoData, mtOutData, cv::COLOR_YUV420p2RGB);
+	memcpy(buff, (void*)mtOutData.data, depth_.height*depth_.width*3);
 }
 
 }

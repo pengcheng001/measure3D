@@ -181,8 +181,8 @@ int  ransac::fittingPlane(double p, double w, double threshold)
           //dis_up = Plane.at<double>(0,0)*((*ptcld)[i])[0] + Plane.at<double>(1,0)*((*ptcld)[i])[1] + Plane.at<double>(2,0) + ((*ptcld)[i])[2] ;
          diffDis = std::abs(dis_up)/dis_sub;
 
-		/// std::cout<<"diffDis"<<diffDis<<std::endl;
 		/// ofile<<"calDis = "<<diffDis<<"  depth+ "<<(*ptcld)[i][2]<<std::endl;
+   ///    std::cout<<"calDis = "<<diffDis<<"  depth  "<<(*ptcld)[i][2]<<std::endl;
           if(std::abs(diffDis) < threshold)
           {
               current_best_points++;
@@ -203,14 +203,14 @@ int  ransac::fittingPlane(double p, double w, double threshold)
 
        }
 
-//       std::cout<<"best_plane = ["<<model[0]<<", "<<model[1]<<", "<<model[2]<<"]"<<std::endl;
-//	   std::cout<<"current_plane = "<<std::endl<<Plane<<std::endl;
-//	   std::cout<<"best_error = "<<best_error<<std::endl;
-//	   std::cout<<"current_error = "<<current_error<<std::endl;
-//	   std::cout<<"best_depth = "<<bestDepth<<std::endl;
-//	   std::cout<<"current_depth = "<<currentAvgDepth<<std::endl;
-//	   std::cout<<"total points = "<<ptcld->getSize()<<std::endl;
-//	   std::cout<<"inner points = "<<current_best_points<<std::endl;
+       std::cout<<"best_plane = ["<<model[0]<<", "<<model[1]<<", "<<model[2]<<"]"<<std::endl;
+       std::cout<<"current_plane = "<<std::endl<<Plane<<std::endl;
+       std::cout<<"best_error = "<<best_error<<std::endl;
+       std::cout<<"current_error = "<<current_error<<std::endl;
+       std::cout<<"best_depth = "<<bestDepth<<std::endl;
+       std::cout<<"current_depth = "<<currentAvgDepth<<std::endl;
+       std::cout<<"total points = "<<ptcld->getSize()<<std::endl;
+       std::cout<<"inner points = "<<current_best_points<<std::endl;
 
 
        if(best_error < 0.7)

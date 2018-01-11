@@ -52,6 +52,7 @@ extern "C"
    void setParameter(IN__ double backgroundParameter[], int method = 0);
    bool measureVol(depthData depth,vol &v, int method = 0);
    void getDepthColor(depthData depth,void *buff);
+   void yuv2rgb(depthData depth,void *buff);
    //Î¢µ÷³¤¿í¸ß
    void dajustVol(short fix_lenght = 0, short fix_width = 0, short fix_height = 0);
    bool measureVol2(depthData depth_, vol &v, int method = 0);
